@@ -5,3 +5,4 @@ bin/client_dynamic
 test.txt
 *.o
 lib/*.a
+lib/*.so
