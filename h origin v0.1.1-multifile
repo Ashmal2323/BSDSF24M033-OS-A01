@@ -1,0 +1,327 @@
+[33mtag v0.1.1-multifile[m
+Tagger: Ashmal2323 <ashmalmustafa0@gmail.com>
+Date:   Fri Sep 25 04:49:04 2026 -0400
+
+Version 0.1.0 - Basic multifile compilation
+
+[33mcommit 5ee39ec506f432b26d1bf10c4b462c952d3fe925[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmultifile-build[m[33m, [m[1;33mtag: [m[1;33mv0.1.1-multifile[m[33m, [m[1;31morigin/multifile-build[m[33m)[m
+Author: Ashmal2323 <ashmalmustafa0@gmail.com>
+Date:   Fri Sep 25 04:44:06 2026 -0400
+
+    Implement string and file utility functions with multi-file Makefile build
+
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..c95b6b9[m
+[1m--- /dev/null[m
+[1m+++ b/.gitignore[m
+[36m@@ -0,0 +1,6 @@[m
+[32m+[m[32mobj/*.o[m
+[32m+[m[32mbin/client[m
+[32m+[m[32mbin/client_static[m
+[32m+[m[32mbin/client_dynamic[m
+[32m+[m[32mtest.txt[m
+[32m+[m[32m*.o[m
+[1mdiff --git a/Makefile b/Makefile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a507964[m
+[1m--- /dev/null[m
+[1m+++ b/Makefile[m
+[36m@@ -0,0 +1,10 @@[m
+[32m+[m[32m# Top-level Makefile: delegates the real build work to src/[m
+[32m+[m[32m# This is the "recursive make" pattern.[m
+[32m+[m
+[32m+[m[32m.PHONY: all clean[m
+[32m+[m
+[32m+[m[32mall:[m
+[32m+[m	[32m$(MAKE) -C src[m
+[32m+[m
+[32m+[m[32mclean:[m
+[32m+[m	[32m$(MAKE) -C src clean[m
+[1mdiff --git a/include/myfilefunctions.h b/include/myfilefunctions.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3e32646[m
+[1m--- /dev/null[m
+[1m+++ b/include/myfilefunctions.h[m
+[36m@@ -0,0 +1,14 @@[m
+[32m+[m[32m#ifndef MYFILEFUNCTIONS_H[m
+[32m+[m[32m#define MYFILEFUNCTIONS_H[m
+[32m+[m
+[32m+[m[32m#include <stdio.h>[m
+[32m+[m
+[32m+[m[32m// Count the number of lines, words and characters in the passed file[m
+[32m+[m[32m// stream pointer. Return 0 on success and -1 on failure.[m
+[32m+[m[32mint wordCount(FILE* file, int* lines, int* words, int* chars);[m
+[32m+[m
+[32m+[m[32m// Search lines containing search_str in a file, and fills the matches[m
+[32m+[m[32m// array. Return the count of matches and -1 on failure.[m
+[32m+[m[32mint mygrep(FILE* fp, const char* search_str, char*** matches);[m
+[32m+[m
+[32m+[m[32m#endif[m
+[1mdiff --git a/include/mystrfunctions.h b/include/mystrfunctions.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3a50df1[m
+[1m--- /dev/null[m
+[1m+++ b/include/mystrfunctions.h[m
+[36m@@ -0,0 +1,9 @@[m
+[32m+[m[32m#ifndef MYSTRFUNCTIONS_H[m
+[32m+[m[32m#define MYSTRFUNCTIONS_H[m
+[32m+[m
+[32m+[m[32mint mystrlen(const char* s);[m
+[32m+[m[32mint mystrcpy(char* dest, const char* src);[m
+[32m+[m[32mint mystrncpy(char* dest, const char* src, int n);[m
+[32m+[m[32mint mystrcat(char* dest, const char* src);[m
+[32m+[m
+[32m+[m[32m#endif[m
+[1mdiff --git a/src/Makefile b/src/Makefile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..045babc[m
+[1m--- /dev/null[m
+[1m+++ b/src/Makefile[m
+[36m@@ -0,0 +1,23 @@[m
+[32m+[m[32m# src/Makefile — does the actual compiling and linking[m
+[32m+[m
+[32m+[m[32mCC = gcc[m
+[32m+[m[32mCFLAGS = -Wall -I../include[m
+[32m+[m[32mOBJDIR = ../obj[m
+[32m+[m[32mBINDIR = ../bin[m
+[32m+[m[32mTARGET = $(BINDIR)/client[m
+[32m+[m
+[32m+[m[32mSOURCES = mystrfunctions.c myfilefunctions.c main.c[m
+[32m+[m[32mOBJECTS = $(SOURCES:%.c=$(OBJDIR)/%.o)[m
+[32m+[m
+[32m+[m[32m.PHONY: all clean[m
+[32m+[m
+[32m+[m[32mall: $(TARGET)[m
+[32m+[m
+[32m+[m[32m$(TARGET): $(OBJECTS)[m
+[32m+[m	[32m$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)[m
+[32m+[m
+[32m+[m[32m$(OBJDIR)/%.o: %.c[m
+[32m+[m	[32m$(CC) $(CFLAGS) -c $< -o $@[m
+[32m+[m
+[32m+[m[32mclean:[m
+[32m+[m	[32mrm -f $(OBJDIR)/*.o $(TARGET)[m
+[1mdiff --git a/src/main.c b/src/main.c[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8236a00[m
+[1m--- /dev/null[m
+[1m+++ b/src/main.c[m
+[36m@@ -0,0 +1,86 @@[m
+[32m+[m[32m#include <stdio.h>[m
+[32m+[m[32m#include <stdlib.h>[m
+[32m+[m[32m#include "../include/mystrfunctions.h"[m
+[32m+[m[32m#include "../include/myfilefunctions.h"[m
+[32m+[m
+[32m+[m[32mint main() {[m
+[32m+[m[32m    printf("--- Testing String Functions ---\n");[m
+[32m+[m
+[32m+[m[32m    // Test mystrlen[m
+[32m+[m[32m    const char* sample = "hello";[m
+[32m+[m[32m    printf("mystrlen(\"%s\") = %d\n", sample, mystrlen(sample));[m
+[32m+[m
+[32m+[m[32m    // Test mystrcpy[m
+[32m+[m[32m    char dest1[50];[m
+[32m+[m[32m    mystrcpy(dest1, "copied text");[m
+[32m+[m[32m    printf("mystrcpy result: \"%s\"\n", dest1);[m
+[32m+[m
+[32m+[m[32m    // Test mystrncpy[m
+[32m+[m[32m    char dest2[50];[m
+[32m+[m[32m    mystrncpy(dest2, "truncated text", 5);[m
+[32m+[m[32m    printf("mystrncpy (n=5) result: \"%s\"\n", dest2);[m
+[32m+[m
+[32m+[m[32m    // Test mystrcat[m
+[32m+[m[32m    char dest3[50] = "Hello, ";[m
+[32m+[m[32m    mystrcat(dest3, "world!");[m
+[32m+[m[32m    printf("mystrcat result: \"%s\"\n", dest3);[m
+[32m+[m
+[32m+[m[32m    printf("\n--- Testing File Functions ---\n");[m
+[32m+[m
+[32m+[m[32m    // Create a small test file to work with[m
+[32m+[m[32m    FILE* writeFile = fopen("test.txt", "w");[m
+[32m+[m[32m    if (writeFile == NULL) {[m
+[32m+[m[32m        printf("Error: could not create test.txt\n");[m
+[32m+[m[32m        return 1;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    fprintf(writeFile, "This is line one\n");[m
+[32m+[m[32m    fprintf(writeFile, "This is line two with apple\n");[m
+[32m+[m[32m    fprintf(writeFile, "Another line without the fruit\n");[m
+[32m+[m[32m    fprintf(writeFile, "Final line has apple again\n");[m
+[32m+[m[32m    fclose(writeFile);[m
+[32m+[m
+[32m+[m[32m    // Test wordCount[m
+[32m+[m[32m    FILE* readFile = fopen("test.txt", "r");[m
+[32m+[m[32m    if (readFile == NULL) {[m
+[32m+[m[32m        printf("Error: could not open test.txt\n");[m
+[32m+[m[32m        return 1;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    int lines, words, chars;[m
+[32m+[m[32m    int wcResult = wordCount(readFile, &lines, &words, &chars);[m
+[32m+[m[32m    fclose(readFile);[m
+[32m+[m
+[32m+[m[32m    if (wcResult == 0) {[m
+[32m+[m[32m        printf("wordCount -> lines: %d, words: %d, chars: %d\n", lines, words, chars);[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        printf("wordCount failed\n");[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Test mygrep[m
+[32m+[m[32m    FILE* grepFile = fopen("test.txt", "r");[m
+[32m+[m[32m    if (grepFile == NULL) {[m
+[32m+[m[32m        printf("Error: could not open test.txt\n");[m
+[32m+[m[32m        return 1;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    char** matches = NULL;[m
+[32m+[m[32m    int matchCount = mygrep(grepFile, "apple", &matches);[m
+[32m+[m[32m    fclose(grepFile);[m
+[32m+[m
+[32m+[m[32m    if (matchCount >= 0) {[m
+[32m+[m[32m        printf("mygrep found %d matching line(s) for \"apple\":\n", matchCount);[m
+[32m+[m[32m        for (int i = 0; i < matchCount; i++) {[m
+[32m+[m[32m            printf("  %s", matches[i]);  // matches[i] already ends with '\n'[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        // Free the memory mygrep allocated, in correct order[m
+[32m+[m[32m        for (int i = 0; i < matchCount; i++) {[m
+[32m+[m[32m            free(matches[i]);[m
+[32m+[m[32m        }[m
+[32m+[m[32m        free(matches);[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        printf("mygrep failed\n");[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/myfilefunctions.c b/src/myfilefunctions.c[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3dc8826[m
+[1m--- /dev/null[m
+[1m+++ b/src/myfilefunctions.c[m
+[36m@@ -0,0 +1,79 @@[m
+[32m+[m[32m#include "../include/myfilefunctions.h"[m
+[32m+[m[32m#include "../include/mystrfunctions.h"[m
+[32m+[m[32m#include <stdlib.h>[m
+[32m+[m[32m#include <string.h>[m
+[32m+[m
+[32m+[m[32mint wordCount(FILE* file, int* lines, int* words, int* chars) {[m
+[32m+[m[32m    if (file == NULL) {[m
+[32m+[m[32m        return -1;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    *lines = 0;[m
+[32m+[m[32m    *words = 0;[m
+[32m+[m[32m    *chars = 0;[m
+[32m+[m
+[32m+[m[32m    int c;[m
+[32m+[m[32m    int inWord = 0;[m
+[32m+[m
+[32m+[m[32m    while ((c = fgetc(file)) != EOF) {[m
+[32m+[m[32m        (*chars)++;[m
+[32m+[m
+[32m+[m[32m        if (c == '\n') {[m
+[32m+[m[32m            (*lines)++;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if (c == ' ' || c == '\n' || c == '\t') {[m
+[32m+[m[32m            inWord = 0;[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            if (inWord == 0) {[m
+[32m+[m[32m                (*words)++;[m
+[32m+[m[32m                inWord = 1;[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mint mygrep(FILE* fp, const char* search_str, char*** matches) {[m
+[32m+[m[32m    if (fp == NULL || search_str == NULL) {[m
+[32m+[m[32m        return -1;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    int capacity = 4;[m
+[32m+[m[32m    int count = 0;[m
+[32m+[m[32m    char** result = malloc(capacity * sizeof(char*));[m
+[32m+[m[32m    if (result == NULL) {[m
+[32m+[m[32m        return -1;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    char buffer[1024];[m
+[32m+[m
+[32m+[m[32m    while (fgets(buffer, sizeof(buffer), fp) != NULL) {[m
+[32m+[m[32m        if (strstr(buffer, search_str) != NULL) {[m
+[32m+[m[32m            if (count == capacity) {[m
+[32m+[m[32m                capacity *= 2;[m
+[32m+[m[32m                char** temp = realloc(result, capacity * sizeof(char*));[m
+[32m+[m[32m                if (temp == NULL) {[m
+[32m+[m[32m                    for (int i = 0; i < count; i++) {[m
+[32m+[m[32m                        free(result[i]);[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                    free(result);[m
+[32m+[m[32m                    return -1;[m
+[32m+[m[32m                }[m
+[32m+[m[32m                result = temp;[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            int len = mystrlen(buffer);[m
+[32m+[m[32m            result[count] = malloc(len + 1);[m
+[32m+[m[32m            if (result[count] == NULL) {[m
+[32m+[m[32m                return -1;[m
+[32m+[m[32m            }[m
+[32m+[m[32m            mystrcpy(result[count], buffer);[m
+[32m+[m[32m            count++;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    *matches = result;[m
+[32m+[m[32m    return count;[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/mystrfunctions.c b/src/mystrfunctions.c[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e158e6d[m
+[1m--- /dev/null[m
+[1m+++ b/src/mystrfunctions.c[m
+[36m@@ -0,0 +1,40 @@[m
+[32m+[m[32m#include "../include/mystrfunctions.h"[m
+[32m+[m
+[32m+[m[32mint mystrlen(const char* s) {[m
+[32m+[m[32m    int count = 0;[m
+[32m+[m[32m    while (s[count] != '\0') {[m
+[32m+[m[32m        count++;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return count;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mint mystrcpy(char* dest, const char* src) {[m
+[32m+[m[32m    int i = 0;[m
+[32m+[m[32m    while (src[i] != '\0') {[m
+[32m+[m[32m        dest[i] = src[i];[m
+[32m+[m[32m        i++;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    dest[i] = '\0';[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mint mystrncpy(char* dest, const char* src, int n) {[m
+[32m+[m[32m    int i = 0;[m
+[32m+[m[32m    while (i < n && src[i] != '\0') {[m
+[32m+[m[32m        dest[i] = src[i];[m
+[32m+[m[32m        i++;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    dest[i] = '\0';[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mint mystrcat(char* dest, const char* src) {[m
+[32m+[m[32m    int destLen = mystrlen(dest);[m
+[32m+[m[32m    int i = 0;[m
+[32m+[m[32m    while (src[i] != '\0') {[m
+[32m+[m[32m        dest[destLen + i] = src[i];[m
+[32m+[m[32m        i++;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    dest[destLen + i] = '\0';[m
+[32m+[m[32m    return 0;[m
+[32m+[m[32m}[m

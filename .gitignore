@@ -4,3 +4,4 @@ bin/client_static
 bin/client_dynamic
 test.txt
 *.o
+lib/*.a
