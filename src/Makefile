@@ -1,10 +1,11 @@
-# src/Makefile — builds client, client_static, and client_dynamic
+# src/Makefile — builds client, client_static, client_dynamic, and installs
 
 CC = gcc
 CFLAGS = -Wall -I../include
 OBJDIR = ../obj
 BINDIR = ../bin
 LIBDIR = ../lib
+PREFIX = /usr/local
 
 TARGET = $(BINDIR)/client
 STATIC_TARGET = $(BINDIR)/client_static
@@ -19,7 +20,7 @@ OBJECTS = $(SOURCES:%.c=$(OBJDIR)/%.o)
 LIB_OBJECTS = $(OBJDIR)/mystrfunctions.o $(OBJDIR)/myfilefunctions.o
 PIC_OBJECTS = $(OBJDIR)/mystrfunctions_pic.o $(OBJDIR)/myfilefunctions_pic.o
 
-.PHONY: all clean static dynamic
+.PHONY: all clean static dynamic install
 
 all: $(TARGET)
 
@@ -47,6 +48,15 @@ $(OBJDIR)/%.o: %.c
 
 $(OBJDIR)/%_pic.o: %.c
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+
+install: $(DYNAMIC_TARGET) $(DYNAMIC_LIB)
+	install -d $(PREFIX)/bin
+	install -d $(PREFIX)/lib
+	install -d $(PREFIX)/man/man3
+	install -m 755 $(DYNAMIC_TARGET) $(PREFIX)/bin/client
+	install -m 755 $(DYNAMIC_LIB) $(PREFIX)/lib
+	install -m 644 ../man/man3/*.3 $(PREFIX)/man/man3
+	ldconfig
 
 clean:
 	rm -f $(OBJDIR)/*.o $(TARGET) $(STATIC_TARGET) $(DYNAMIC_TARGET) $(STATIC_LIB) $(DYNAMIC_LIB)

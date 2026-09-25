@@ -1,0 +1,23 @@
+.TH MYSTRCAT 3 "September 2026" "libmyutils" "Library Functions Manual"
+.SH NAME
+mystrcat \- concatenate two strings
+.SH SYNOPSIS
+.B #include "mystrfunctions.h"
+.sp
+.BI "int mystrcat(char *" dest ", const char *" src );
+.SH DESCRIPTION
+The
+.B mystrcat()
+function appends a copy of the string pointed to by
+.I src
+to the end of the string pointed to by
+.I dest.
+The caller must ensure
+.I dest
+has enough allocated space to hold both its original contents and
+.I src,
+plus the terminating null byte.
+.SH RETURN VALUE
+Returns 0 on success.
+.SH AUTHOR
+Written by Ashmal (BSDSF24M033) for Operating Systems Programming Assignment 01.
